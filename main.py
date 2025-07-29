@@ -32,7 +32,7 @@ async def main():
     book = prepare_book('book/book.txt')
     logger.info('The book is uploaded. Total pages: %d', len(book))
     
-    dd: dict = init_db()
+    db: dict = init_db()
     
     dp.workflow_data.update(book=book, dp=dp)
     
@@ -42,7 +42,7 @@ async def main():
     dp.include_router(other_router)
     
     await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+    await db.start_polling(bot)
     
 if __name__ == '__main__':
     asyncio.run(main())

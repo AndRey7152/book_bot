@@ -124,7 +124,7 @@ async def process_edit_bookmarks_callback(callback: CallbackQuery, book: dict, d
 async def process_cancel_callback(callback: CallbackQuery):
     await callback.message.edit_text(text=LEXICON['cancel_text'])
     
-@user_router.callback_query(IsDigitCallbackData())
+@user_router.callback_query(IsDelBookmarkCallbackData())
 async def process_del_bookmarks_callback(callback: CallbackQuery, book: dict, db: dict):
     db['users'][callback.from_user.id]['bookmarks'].remove(int(callback.data[:-3]))
     if db['users'][callback.from_user.id]['bookmarks']:
