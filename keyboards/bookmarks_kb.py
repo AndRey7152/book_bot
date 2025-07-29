@@ -28,7 +28,7 @@ def create_bookmarks_keyboard(*args: int, book: dict) -> InlineKeyboardMarkup:
     
 def  create_edit_keyborad(*args: int, book: dict) -> InlineKeyboardMarkup:
     kb_builder = InlineKeyboardBuilder()
-    for button in sorted(*args):
+    for button in sorted(args):
         kb_builder.row(
             InlineKeyboardButton(
                 text=f'{LEXICON['del']} {button} - {book[button][:100]}',

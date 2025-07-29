@@ -28,10 +28,10 @@ async def process_beginning_command(message: Message, book: dict, db: dict):
     await message.answer(
         text=text,
         reply_markup=create_pagination_keyboard(
-            'backward',
+            'Назад',
             f'1/{len(book)}',
-            'forward'
-        )
+            'Вперед'
+        ),
     )
     
 @user_router.message(Command(commands='continue'))
@@ -39,10 +39,10 @@ async def process_continue_command(message: Message, book: dict, db: dict):
     text = book[db['users'][message.from_user.id]['page']]
     await message.answer(
         text = text,
-        reply_markup=create_bookmarks_keyboard(
-            'backward',
-            f'{db['users'][message.from_user.id]['page']/{len(book)}}',
-            'forward'
+        reply_markup=create_pagination_keyboard(
+            'Назад',
+            f'{db['users'][message.from_user.id]['page']}/{len(book)}',
+            'Вперед'
         )
     )
     
@@ -59,7 +59,7 @@ async def process_bookmarks_command(message: Message, book: dict, db: dict):
     else:
         await message.answer(text=LEXICON['no_bookmarks'])
         
-@user_router.callback_query(F.data == 'forward')
+@user_router.callback_query(F.data == 'Вперед')
 async def process_forward_callback(callback: CallbackQuery, book: dict, db: dict):
     current_page = db['users'][callback.from_user.id]['page']
     if current_page < len(book):
@@ -68,14 +68,14 @@ async def process_forward_callback(callback: CallbackQuery, book: dict, db: dict
         await callback.message.edit_text(
             text= text,
             reply_markup=create_pagination_keyboard(
-                'backward',
+                'Назад',
                 f'{current_page  +1}/{len(book)}',
-                'forward'
+                'Вперед'
             )
         )
     await callback.answer()
     
-@user_router.callback_query(F.data=='backward')
+@user_router.callback_query(F.data=='Назад')
 async def process_backward_callback(callback: CallbackQuery, book: dict, db: dict):
     current_page = db['users'][callback.from_user.id]['page']
     if current_page > 1:
@@ -84,9 +84,9 @@ async def process_backward_callback(callback: CallbackQuery, book: dict, db: dic
         await callback.message.edit_text(
             text=text,
             reply_markup=create_pagination_keyboard(
-                'backward',
+                'Назад',
                 f'{current_page - 1}/{len(book)}',
-                'forward'
+                'Вперед'
             )
         )
     await callback.answer()
@@ -96,7 +96,7 @@ async def process_page_callback(callback: CallbackQuery, db: dict):
     db['users'][callback.from_user.id]['bookmarks'].add(
         db['users'][callback.from_user.id]['page']
     )
-    await callback.answer('Страница добавлена в закладки')
+    await callback.answer('Страница добавлена в закладки!')
     
 @user_router.callback_query(IsDigitCallbackData())
 async def process_bookmark_callback(callback: CallbackQuery, book: dict, db: dict):
@@ -105,13 +105,13 @@ async def process_bookmark_callback(callback: CallbackQuery, book: dict, db: dic
     await callback.message.edit_text(
         text= text,
         reply_markup=create_pagination_keyboard(
-            'backward',
+            'Назад',
             f'{db['users'][callback.from_user.id]['page']}/{len(book)}',
-            'forward'
+            'Вперед'
         )
     )
     
-@user_router.callback_query(f.data == 'edit_bookmarks')
+@user_router.callback_query(F.data == 'edit_bookmarks')
 async def process_edit_bookmarks_callback(callback: CallbackQuery, book: dict, db: dict):
     await callback.message.edit_text(
         text= LEXICON[callback.data],
@@ -120,6 +120,7 @@ async def process_edit_bookmarks_callback(callback: CallbackQuery, book: dict, d
             book=book
         )
     )
+    
 @user_router.callback_query(F.data == 'cancel')
 async def process_cancel_callback(callback: CallbackQuery):
     await callback.message.edit_text(text=LEXICON['cancel_text'])
@@ -128,7 +129,7 @@ async def process_cancel_callback(callback: CallbackQuery):
 async def process_del_bookmarks_callback(callback: CallbackQuery, book: dict, db: dict):
     db['users'][callback.from_user.id]['bookmarks'].remove(int(callback.data[:-3]))
     if db['users'][callback.from_user.id]['bookmarks']:
-        await callback.message.edict_text(
+        await callback.message.edit_text(
             text=LEXICON['/bookmarks'],
             reply_markup = create_edit_keyborad(
                 *db['users'][callback.from_user.id]['bookmarks'],
